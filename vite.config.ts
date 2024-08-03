@@ -1,3 +1,5 @@
+/// <reference types="vitest" />
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -6,4 +8,6 @@ export default defineConfig({
   plugins: [react()],
   // Reference: https://vitejs.dev/config/shared-options.html#base
   base: "/nmdc-changesheet-converter/",
+  // Reference: https://vitest.dev/guide/#configuring-vitest
+  test: {},
 });
