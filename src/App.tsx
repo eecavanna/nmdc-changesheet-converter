@@ -1,5 +1,7 @@
 import { parse } from "papaparse";
 import DataGrid from "react-data-grid";
+import CodeMirror from "@uiw/react-codemirror";
+import { langs } from "@uiw/codemirror-extensions-langs";
 import "react-data-grid/lib/styles.css";
 
 const csvStr = `
@@ -15,6 +17,20 @@ halo halo,
 ,
 jello
 `.trim();
+
+// FIXME: Instead of returning a mostly hard-coded value, examine the row and return something more specific to the row.
+// Reference: https://api.microbiomedata.org/docs#/queries/run_query_queries_run_post
+const makePayload = (row: string[]): object => {
+  return {
+    update: "foo_set",
+    updates: [{ q: { id: row[0] }, u: { $set: { name: row[1] } } }],
+  };
+};
+
+const makePayloads = (rows: string[][]): string => {
+  const payloads = rows.map((row) => makePayload(row));
+  return JSON.stringify(payloads, null, 2);
+};
 
 function App() {
   const parseResult = parse<string[]>(csvStr, { skipEmptyLines: true });
@@ -44,6 +60,13 @@ function App() {
       </div>
       <div style={{ marginBottom: 8 }}>
         <DataGrid columns={columns} rows={rows} />
+      </div>
+      <div style={{ marginBottom: 8 }}>
+        <CodeMirror
+          theme={"dark"}
+          extensions={[langs.json()]}
+          value={makePayloads(parseResult.data)}
+        />
       </div>
     </>
   );
