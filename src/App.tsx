@@ -1,54 +1,41 @@
-import { parse } from "papaparse";
 import DataGrid from "react-data-grid";
 import CodeMirror from "@uiw/react-codemirror";
 import { langs } from "@uiw/codemirror-extensions-langs";
+import { parseChangesheetContent, Row } from "./lib/changesheet.ts";
 import "react-data-grid/lib/styles.css";
 
 const csvStr = `
-product,price
-apple,1.2
-banana,.50
-carrot,1
-
-egg,4.50
-french toast,10.00
-,.99
-halo halo,
-,
-jello
+id,action,attribute,value
+1,foo,bar,baz
+2,moo,mar,maz
 `.trim();
 
-// FIXME: Instead of returning a mostly hard-coded value, examine the row and return something more specific to the row.
+// FIXME: Determine the relevant collection name (may need to check schema or access API).
 // Reference: https://api.microbiomedata.org/docs#/queries/run_query_queries_run_post
-const makePayload = (row: string[]): object => {
+const makePayload = (row: Row): object => {
   return {
-    update: "foo_set",
-    updates: [{ q: { id: row[0] }, u: { $set: { name: row[1] } } }],
+    update: "TODO_set",
+    updates: [
+      { q: { id: row.id }, u: { $set: { [row.attribute]: row.value } } },
+    ],
   };
 };
 
-const makePayloads = (rows: string[][]): string => {
+const makePayloads = (rows: Row[]): string => {
   const payloads = rows.map((row) => makePayload(row));
   return JSON.stringify(payloads, null, 2);
 };
 
 function App() {
-  const parseResult = parse<string[]>(csvStr, { skipEmptyLines: true });
+  const result = parseChangesheetContent(csvStr);
 
-  // Get column names from first parsed row.
-  const columns = parseResult.data[0].map((columnName) => ({
-    key: columnName,
-    name: columnName,
-  }));
+  // Get column names from result metadata.
+  const columns = Array.isArray(result.meta.fields)
+    ? result.meta.fields.map((name) => ({ key: name, name }))
+    : [];
 
-  // Get data row content from the second parsed row and onward.
-  const rows = parseResult.data.slice(1).map((parsedRow) => {
-    const row: Record<string, string> = {};
-    columns.forEach((column, index) => {
-      row[column.key] = parsedRow[index];
-    });
-    return row;
-  });
+  // Get the row content from the result data.
+  const rows = result.data;
 
   return (
     <>
@@ -56,7 +43,7 @@ function App() {
         <pre>{csvStr}</pre>
       </div>
       <div style={{ marginBottom: 8, padding: 8, border: "1px solid green" }}>
-        <code>{JSON.stringify(parseResult.data)}</code>
+        <code>{JSON.stringify(result.data)}</code>
       </div>
       <div style={{ marginBottom: 8 }}>
         <DataGrid columns={columns} rows={rows} />
@@ -66,7 +53,7 @@ function App() {
           readOnly
           theme={"dark"}
           extensions={[langs.json()]}
-          value={makePayloads(parseResult.data)}
+          value={makePayloads(result.data)}
         />
       </div>
     </>
