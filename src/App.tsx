@@ -1,14 +1,20 @@
 import DataGrid from "react-data-grid";
-import CodeMirror from "@uiw/react-codemirror";
+import CodeMirror, { highlightWhitespace } from "@uiw/react-codemirror";
 import { langs } from "@uiw/codemirror-extensions-langs";
 import { parseChangesheetContent, Row as CSRow } from "./lib/changesheet.ts";
 import "react-data-grid/lib/styles.css";
 import { Col, Container, Row } from "react-bootstrap";
 
-const csvStr = `
-id,action,attribute,value
-1,foo,bar,baz
-2,moo,mar,maz
+// Note: This string was copy/pasted from: `src/lib/test-data/vendor/changesheet-without-separator1.tsv`
+const changesheetContent = `
+id	action	attribute	value
+gold:Gs0103573	update	name	NEW NAME 1
+		ecosystem	SOIL
+gold:Gs0114663	update	doi	v1
+v1		has_raw_value	10.9999/8888
+	update	name	NEW NAME 2
+	update	principal_investigator	v2
+v2		has_raw_value	NEW RAW VALUE 2
 `.trim();
 
 // FIXME: Determine the relevant collection name (may need to check schema or access API).
@@ -28,7 +34,7 @@ const makePayloads = (rows: CSRow[]): string => {
 };
 
 function App() {
-  const result = parseChangesheetContent(csvStr);
+  const result = parseChangesheetContent(changesheetContent);
 
   // Get column names from result metadata.
   const columns = Array.isArray(result.meta.fields)
@@ -45,8 +51,10 @@ function App() {
           <CodeMirror
             readOnly
             theme={"dark"}
-            extensions={[langs.json()]}
-            value={csvStr}
+            // TODO: Consider implementing a CodeMirror language extension for CSV/TSV files.
+            //       See: https://gist.github.com/rooks/6a13affb544ef8bc338b49af7d018318
+            extensions={[highlightWhitespace()]}
+            value={changesheetContent}
           />
         </Col>
       </Row>
