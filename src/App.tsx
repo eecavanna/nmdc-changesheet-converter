@@ -8,6 +8,11 @@ banana,.50
 carrot,1
 
 egg,4.50
+french toast,10.00
+,.99
+halo halo,
+,
+jello
 `.trim();
 
 function App() {
