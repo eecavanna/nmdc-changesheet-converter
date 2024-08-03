@@ -18,7 +18,7 @@ jobs:
   # Reference: https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
   test:
     name: Run tests
-    uses: .github/workflows/run-tests.yaml
+    uses: ./.github/workflows/run-tests.yaml
 
   build:
     name: Build app
