@@ -14,7 +14,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Use a different workflow to run the tests.
+  # Reference: https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
+  test:
+    name: Run tests
+    uses: .github/workflows/run-tests.yaml
+
   build:
+    name: Build app
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,7 +43,12 @@ jobs:
           path: dist
 
   deploy:
-    needs: build  # this "deploy" job depends upon the "build" job
+    name: Deploy app
+    # This "deploy" job depends upon both the "build" and "test" jobs succeeding.
+    # Reference: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idneeds
+    needs:
+      - build
+      - test
     runs-on: ubuntu-latest
     # Reference: https://github.com/actions/deploy-pages
     permissions:
