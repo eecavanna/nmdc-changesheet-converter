@@ -63,6 +63,7 @@ function App() {
       </div>
       <div style={{ marginBottom: 8 }}>
         <CodeMirror
+          readOnly
           theme={"dark"}
           extensions={[langs.json()]}
           value={makePayloads(parseResult.data)}
