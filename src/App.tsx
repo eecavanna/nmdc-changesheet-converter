@@ -1,35 +1,18 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { parse } from "papaparse";
 import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0);
+const csvStr = `
+product,price
+apple,1.2
+banana,.50
+carrot,1
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  );
+egg,4.50
+`.trim();
+
+function App() {
+  const parseResult = parse<string[][]>(csvStr, { skipEmptyLines: true });
+  return <>{JSON.stringify(parseResult.data)}</>;
 }
 
 export default App;
