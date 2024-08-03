@@ -56,4 +56,24 @@ describe("parseChangesheetContent", () => {
     expect(result.data[1].attribute).toBe("mar");
     expect(result.data[1].value).toBe("maz");
   });
+
+  it("parses changesheet content containing dot-delimited attributes", () => {
+    const content = loadTestContent(
+      "vendor/changesheet-array-item-nested-attributes.tsv",
+    );
+    const result = parseChangesheetContent(content);
+    expect(result.meta.fields).toHaveLength(4);
+    expect(result.errors).toHaveLength(0);
+    expect(result.data).toHaveLength(5);
+  });
+
+  it("parses changesheet content containing blank ids and actions", () => {
+    const content = loadTestContent(
+      "vendor/changesheet-without-separator1.tsv",
+    );
+    const result = parseChangesheetContent(content);
+    expect(result.meta.fields).toHaveLength(4);
+    expect(result.errors).toHaveLength(0);
+    expect(result.data).toHaveLength(7);
+  });
 });
