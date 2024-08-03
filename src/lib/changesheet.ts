@@ -74,8 +74,10 @@ export const parseChangesheetContent = (
 };
 
 /**
- * Populates missing `id` values in the specified rows. Specifically, if the `id` on a given row is empty,
- * this function populates it with the most recently-encountered non-empty `id` value.
+ * Populates missing `id` values in the specified rows, in place.
+ *
+ * Specifically, if the `id` on a given row is empty, this function populates it with the most recently-encountered
+ * non-empty `id` value.
  */
 export const populateMissingIds = (orderedRows: Row[]): Row[] => {
   let previousId: Row["id"] = "";
@@ -95,8 +97,10 @@ export const populateMissingIds = (orderedRows: Row[]): Row[] => {
 };
 
 /**
- * Populates missing `action` values in the specified rows. Specifically, if the `action` on a given row is empty,
- * this function populates it with the most recently-encountered non-empty `action` value.
+ * Populates missing `action` values in the specified rows, in place.
+ *
+ * Specifically, if the `action` on a given row is empty, this function populates it with the most recently-encountered
+ * non-empty `action` value.
  */
 export const populateMissingActions = (orderedRows: Row[]): Row[] => {
   let previousAction: Row["action"] = "";

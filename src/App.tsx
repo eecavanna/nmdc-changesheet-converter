@@ -1,7 +1,12 @@
 import DataGrid from "react-data-grid";
 import CodeMirror, { highlightWhitespace } from "@uiw/react-codemirror";
 import { langs } from "@uiw/codemirror-extensions-langs";
-import { parseChangesheetContent, Row as CSRow } from "./lib/changesheet.ts";
+import {
+  parseChangesheetContent,
+  populateMissingActions,
+  populateMissingIds,
+  Row as CSRow,
+} from "./lib/changesheet.ts";
 import "react-data-grid/lib/styles.css";
 import { Col, Container, Row } from "react-bootstrap";
 
@@ -44,10 +49,28 @@ function App() {
   // Get the row content from the result data.
   const rows = result.data;
 
+  // Get a version where all `action` and `id` values are explicit.
+  const rowsExplicit = populateMissingActions(
+    populateMissingIds(structuredClone(rows)),
+  );
+
   return (
     <Container fluid>
       <Row className={"pb-3"}>
         <Col>
+          <h3>Changesheet</h3>
+          <small>
+            Source:{" "}
+            <a
+              target={"_blank"}
+              rel={"noreferrer"}
+              href={
+                "https://github.com/microbiomedata/nmdc-runtime/blob/84bb7dec50bbc74682c04f466d317eaa07102ebf/metadata-translation/notebooks/data/changesheet-without-separator1.tsv"
+              }
+            >
+              changesheet-without-separator1.tsv
+            </a>
+          </small>
           <CodeMirror
             readOnly
             theme={"dark"}
@@ -60,16 +83,30 @@ function App() {
       </Row>
       <Row className={"pb-3"}>
         <Col>
+          <h3>Changesheet as table</h3>
           <DataGrid columns={columns} rows={rows} />
+        </Col>
+      </Row>
+      <Row className={"pb-3"}>
+        <Col>
+          <h3>
+            Changesheet as table (with explicit <code>id</code> and{" "}
+            <code>action</code> values)
+          </h3>
+          <DataGrid columns={columns} rows={rowsExplicit} />
         </Col>
       </Row>
       <Row>
         <Col>
+          <h3>
+            (TODO) Equivalent payloads for <code>/queries:run</code> API
+            endpoint
+          </h3>
           <CodeMirror
             readOnly
             theme={"dark"}
             extensions={[langs.json()]}
-            value={makePayloads(result.data)}
+            value={makePayloads(rowsExplicit)}
           />
         </Col>
       </Row>
