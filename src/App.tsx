@@ -1,8 +1,9 @@
 import DataGrid from "react-data-grid";
 import CodeMirror from "@uiw/react-codemirror";
 import { langs } from "@uiw/codemirror-extensions-langs";
-import { parseChangesheetContent, Row } from "./lib/changesheet.ts";
+import { parseChangesheetContent, Row as CSRow } from "./lib/changesheet.ts";
 import "react-data-grid/lib/styles.css";
+import { Col, Container, Row } from "react-bootstrap";
 
 const csvStr = `
 id,action,attribute,value
@@ -12,7 +13,7 @@ id,action,attribute,value
 
 // FIXME: Determine the relevant collection name (may need to check schema or access API).
 // Reference: https://api.microbiomedata.org/docs#/queries/run_query_queries_run_post
-const makePayload = (row: Row): object => {
+const makePayload = (row: CSRow): object => {
   return {
     update: "TODO_set",
     updates: [
@@ -21,7 +22,7 @@ const makePayload = (row: Row): object => {
   };
 };
 
-const makePayloads = (rows: Row[]): string => {
+const makePayloads = (rows: CSRow[]): string => {
   const payloads = rows.map((row) => makePayload(row));
   return JSON.stringify(payloads, null, 2);
 };
@@ -38,25 +39,33 @@ function App() {
   const rows = result.data;
 
   return (
-    <>
-      <div style={{ marginBottom: 8, padding: 8, border: "1px solid yellow" }}>
-        <pre>{csvStr}</pre>
-      </div>
-      <div style={{ marginBottom: 8, padding: 8, border: "1px solid green" }}>
-        <code>{JSON.stringify(result.data)}</code>
-      </div>
-      <div style={{ marginBottom: 8 }}>
-        <DataGrid columns={columns} rows={rows} />
-      </div>
-      <div style={{ marginBottom: 8 }}>
-        <CodeMirror
-          readOnly
-          theme={"dark"}
-          extensions={[langs.json()]}
-          value={makePayloads(result.data)}
-        />
-      </div>
-    </>
+    <Container fluid>
+      <Row className={"pb-3"}>
+        <Col>
+          <CodeMirror
+            readOnly
+            theme={"dark"}
+            extensions={[langs.json()]}
+            value={csvStr}
+          />
+        </Col>
+      </Row>
+      <Row className={"pb-3"}>
+        <Col>
+          <DataGrid columns={columns} rows={rows} />
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <CodeMirror
+            readOnly
+            theme={"dark"}
+            extensions={[langs.json()]}
+            value={makePayloads(result.data)}
+          />
+        </Col>
+      </Row>
+    </Container>
   );
 }
 

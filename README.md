@@ -1,7 +1,13 @@
 # nmdc-changesheet-converter
 
+## Development status
+
+- 🚧 Prototyping core functionality
+
 ## Dependencies
 
+- [bootstrap](https://github.com/twbs/bootstrap) - Toolkit for web-based UIs
+- [react-bootstrap](https://github.com/react-bootstrap/react-bootstrap) - React integration of Bootstrap
 - [papaparse](https://github.com/mholt/PapaParse) - CSV parser that runs in the browser
 - [react-data-grid](https://github.com/adazzle/react-data-grid/) - Displays tabular data as a grid
 - [@uiw/react-codemirror](https://github.com/uiwjs/react-codemirror) - Fancy code editor in the browser
