@@ -1,4 +1,10 @@
 {
+  "compilerOptions": {
+    "types": [
+      // Reference: https://vitejs.dev/guide/features.html#client-types
+      "vite/client"
+    ]
+  },
   "files": [],
   "references": [
     {
