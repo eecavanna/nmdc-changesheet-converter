@@ -72,3 +72,45 @@ export const parseChangesheetContent = (
   // Parse the changesheet content.
   return parse<Row>(changesheetContent, parserConfig);
 };
+
+/**
+ * Populates missing `id` values in the specified rows. Specifically, if the `id` on a given row is empty,
+ * this function populates it with the most recently-encountered non-empty `id` value.
+ */
+export const populateMissingIds = (orderedRows: Row[]): Row[] => {
+  let previousId: Row["id"] = "";
+  orderedRows.forEach((row) => {
+    if (row.id === "") {
+      if (previousId !== "") {
+        row.id = previousId;
+      } else {
+        throw new Error(
+          "Failed to populate missing `id` because no previous non-empty `id` exists.",
+        );
+      }
+    }
+    previousId = row.id;
+  });
+  return orderedRows;
+};
+
+/**
+ * Populates missing `action` values in the specified rows. Specifically, if the `action` on a given row is empty,
+ * this function populates it with the most recently-encountered non-empty `action` value.
+ */
+export const populateMissingActions = (orderedRows: Row[]): Row[] => {
+  let previousAction: Row["action"] = "";
+  orderedRows.forEach((row) => {
+    if (row.action === "") {
+      if (previousAction !== "") {
+        row.action = previousAction;
+      } else {
+        throw new Error(
+          "Failed to populate missing `action` because no previous non-empty `action` exists.",
+        );
+      }
+    }
+    previousAction = row.action;
+  });
+  return orderedRows;
+};
