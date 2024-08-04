@@ -13,6 +13,8 @@
 - [@uiw/react-codemirror](https://github.com/uiwjs/react-codemirror) - Fancy code editor in the browser
 - [@uiw/codemirror-extensions-langs](https://uiwjs.github.io/react-codemirror/#/extensions/languages) - Syntax
   highlighting extension for React CodeMirror
+- [@codemirror/commands](https://github.com/codemirror/commands) - Editing functionality for CodeMirror (we use it to
+  customize the effect of pressing the tab key)
 - [vitest](https://github.com/vitest-dev/vitest) - Testing framework powered by Vite
 
 ## References

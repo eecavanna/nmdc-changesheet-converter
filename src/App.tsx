@@ -1,6 +1,8 @@
+import { useState } from "react";
 import DataGrid from "react-data-grid";
 import CodeMirror, { highlightWhitespace } from "@uiw/react-codemirror";
 import { langs } from "@uiw/codemirror-extensions-langs";
+import { codeMirrorExtensions } from "./lib/codemirror.ts";
 import {
   parseChangesheetContent,
   populateMissingActions,
@@ -39,7 +41,8 @@ const makePayloads = (rows: CSRow[]): string => {
 };
 
 function App() {
-  const result = parseChangesheetContent(changesheetContent);
+  const [editorValue, setEditorValue] = useState<string>(changesheetContent);
+  const result = parseChangesheetContent(editorValue);
 
   // Get column names from result metadata.
   const columns = Array.isArray(result.meta.fields)
@@ -50,8 +53,10 @@ function App() {
   const rows = result.data;
 
   // Get a version where all `action` and `id` values are explicit.
+  // Reference: https://developer.mozilla.org/en-US/docs/Web/API/structuredClone
+  // FIXME: Now that the changesheet content (UI field) is editable, catch exceptions thrown by these functions.
   const rowsExplicit = populateMissingActions(
-    populateMissingIds(structuredClone(rows)),
+    populateMissingIds(window.structuredClone(rows)),
   );
 
   return (
@@ -60,24 +65,26 @@ function App() {
         <Col>
           <h3>Changesheet</h3>
           <small>
-            Source:{" "}
+            <span>Source: </span>
             <a
               target={"_blank"}
               rel={"noreferrer"}
               href={
                 "https://github.com/microbiomedata/nmdc-runtime/blob/84bb7dec50bbc74682c04f466d317eaa07102ebf/metadata-translation/notebooks/data/changesheet-without-separator1.tsv"
               }
+              style={{ textDecoration: "none" }}
             >
               changesheet-without-separator1.tsv
             </a>
           </small>
           <CodeMirror
-            readOnly
             theme={"dark"}
             // TODO: Consider implementing a CodeMirror language extension for CSV/TSV files.
             //       See: https://gist.github.com/rooks/6a13affb544ef8bc338b49af7d018318
-            extensions={[highlightWhitespace()]}
-            value={changesheetContent}
+            extensions={[highlightWhitespace(), codeMirrorExtensions.tab()]}
+            onChange={setEditorValue}
+            value={editorValue}
+            indentWithTab={false} // turn this off and use the extension instead
           />
         </Col>
       </Row>
@@ -103,7 +110,7 @@ function App() {
             endpoint
           </h3>
           <CodeMirror
-            readOnly
+            editable={false}
             theme={"dark"}
             extensions={[langs.json()]}
             value={makePayloads(rowsExplicit)}
