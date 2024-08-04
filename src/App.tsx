@@ -10,7 +10,14 @@ import {
   Row as CSRow,
 } from "./lib/changesheet.ts";
 import "react-data-grid/lib/styles.css";
-import { Col, Container, Row } from "react-bootstrap";
+import {
+  Col,
+  Collapse,
+  Container,
+  Row,
+  Stack,
+  ToggleButton,
+} from "react-bootstrap";
 import { AboutMessageTooltipTrigger } from "./components/misc.tsx";
 import { makePayloads } from "./lib/payload.ts";
 
@@ -33,6 +40,10 @@ function App() {
   const [editorValue, setEditorValue] = useState<string>(
     initialChangesheetContent,
   );
+
+  const [isDebugSectionVisible, setIsDebugSectionVisible] =
+    useState<boolean>(true);
+
   const result = parseChangesheetContent(editorValue);
 
   // Get column names from result metadata.
@@ -73,13 +84,34 @@ function App() {
           </h1>
           <p>
             Drop a changesheet into the &quot;Changesheet&quot; field, then copy
-            the resulting payloads from the &quot;Equivalent Payloads&quot; section.
+            the resulting payloads from the &quot;Payloads&quot; section.
           </p>
         </Col>
       </Row>
       <Row className={"pb-3"}>
         <Col>
-          <h3>Changesheet</h3>
+          <Stack
+            direction={"horizontal"}
+            gap={3}
+            className={"justify-content-between"}
+          >
+            <h3>Changesheet</h3>
+            <ToggleButton
+              className={"mb-1"}
+              variant={"secondary"}
+              size={"sm"}
+              id={"toggle-is-debug-section-visible"}
+              type={"checkbox"}
+              checked={isDebugSectionVisible}
+              value={1}
+              onChange={(e) =>
+                setIsDebugSectionVisible(e.currentTarget.checked)
+              }
+            >
+              {isDebugSectionVisible ? "Hide " : "Show "} intermediate states
+            </ToggleButton>
+          </Stack>
+          <p>Drop a changesheet file or paste the changesheet contents here.</p>
           <CodeMirror
             autoFocus
             height={"200px"}
@@ -96,29 +128,40 @@ function App() {
           />
         </Col>
       </Row>
-      <Row className={"pb-3"}>
-        <Col>
-          <h3>Changesheet as table</h3>
-          <DataGrid columns={columns} rows={rows} />
-        </Col>
-      </Row>
-      <Row
-        className={"pb-3"}
-        style={failedToInferStuff ? { filter: "blur(8px)" } : {}}
-      >
-        <Col>
-          <h3>
-            Changesheet as table (showing inferred <code>id</code> and{" "}
-            <code>action</code> values)
-          </h3>
-          <DataGrid columns={columns} rows={rowsExplicit} />
-        </Col>
-      </Row>
+      <Collapse in={isDebugSectionVisible}>
+        <div>
+          <Row className={"pb-3"}>
+            <Col>
+              <h3>Changesheet as table (raw)</h3>
+              <p>
+                Here&apos;s a table showing the changesheet contents verbatim.
+              </p>
+              <DataGrid columns={columns} rows={rows} />
+            </Col>
+          </Row>
+          <Row
+            className={"pb-3"}
+            style={failedToInferStuff ? { filter: "blur(8px)" } : {}}
+          >
+            <Col>
+              <h3>Changesheet as table (dense)</h3>
+              <p>
+                Here&apos;s a table in which all empty <code>id</code> and{" "}
+                <code>action</code> cells, if any, have been filled in using the
+                most recent non-empty value in that column.
+              </p>
+              <DataGrid columns={columns} rows={rowsExplicit} />
+            </Col>
+          </Row>
+        </div>
+      </Collapse>
       <Row style={failedToInferStuff ? { filter: "blur(8px)" } : {}}>
         <Col>
-          <h3>
-            Equivalent payloads for <code>/queries:run</code> API endpoint
-          </h3>
+          <h3>Payloads</h3>
+          <p>
+            Here are the equivalent HTTP request payloads for the{" "}
+            <code>/queries:run</code> endpoint of the NMDC Runtime API.
+          </p>
           {/* TODO: Once we know the collection names, combine consecutive payloads involving the same collection. */}
           <CodeMirror
             editable={false}
