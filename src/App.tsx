@@ -12,9 +12,10 @@ import {
 } from "./lib/changesheet.ts";
 import "react-data-grid/lib/styles.css";
 import { Col, Container, Row } from "react-bootstrap";
+import { AboutMessageTooltipTrigger } from "./components/misc.tsx";
 
 // Note: This string was copy/pasted from: `src/lib/test-data/vendor/changesheet-without-separator1.tsv`
-const changesheetContent = `
+const initialChangesheetContent = `
 id	action	attribute	value
 gold:Gs0103573	update	name	NEW NAME 1
 		ecosystem	SOIL
@@ -83,8 +84,13 @@ const makePayloads = (rows: CSRow[]): string => {
   return JSON.stringify(payloads, null, 2);
 };
 
+// TODO: Consider showing an error message when the changesheet doesn't contain the columns we expect;
+//       in general, consider validating the changesheet to some extent.
+
 function App() {
-  const [editorValue, setEditorValue] = useState<string>(changesheetContent);
+  const [editorValue, setEditorValue] = useState<string>(
+    initialChangesheetContent,
+  );
   const result = parseChangesheetContent(editorValue);
 
   // Get column names from result metadata.
@@ -117,7 +123,18 @@ function App() {
   }
 
   return (
-    <Container fluid>
+    <Container fluid className={"p-3"}>
+      <Row className={"pb-3"}>
+        <Col>
+          <h1>
+            Changesheet converter <AboutMessageTooltipTrigger />
+          </h1>
+          <p>
+            Drop a changesheet into the "Changesheet" field, then copy the
+            resulting payloads from the "Payloads" field.
+          </p>
+        </Col>
+      </Row>
       <Row className={"pb-3"}>
         <Col>
           <h3>Changesheet</h3>
@@ -126,22 +143,26 @@ function App() {
             <a
               target={"_blank"}
               rel={"noreferrer"}
+              className={"text-decoration-none"}
               href={
                 "https://github.com/microbiomedata/nmdc-runtime/blob/84bb7dec50bbc74682c04f466d317eaa07102ebf/metadata-translation/notebooks/data/changesheet-without-separator1.tsv"
               }
-              style={{ textDecoration: "none" }}
             >
               changesheet-without-separator1.tsv
             </a>
           </small>
           <CodeMirror
+            autoFocus
+            height={"200px"}
+            placeholder={"Paste or drop your changesheet here..."}
             theme={"dark"}
             // TODO: Consider implementing a CodeMirror language extension for CSV/TSV files.
             //       See: https://gist.github.com/rooks/6a13affb544ef8bc338b49af7d018318
             extensions={[highlightWhitespace(), codeMirrorExtensions.tab()]}
+            onDrop={() => setEditorValue("")} // empties the editor before dropping content
             onChange={setEditorValue}
             value={editorValue}
-            indentWithTab={false} // turn this off and use the extension instead
+            indentWithTab={false} // we handle [TAB] key presses, with a custom extension instead
           />
         </Col>
       </Row>
