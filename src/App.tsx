@@ -11,6 +11,7 @@ import {
 } from "./lib/changesheet.ts";
 import "react-data-grid/lib/styles.css";
 import {
+  Alert,
   Col,
   Collapse,
   Container,
@@ -42,7 +43,7 @@ function App() {
   );
 
   const [isDebugSectionVisible, setIsDebugSectionVisible] =
-    useState<boolean>(true);
+    useState<boolean>(false);
 
   const result = parseChangesheetContent(editorValue);
 
@@ -79,6 +80,22 @@ function App() {
     <Container fluid className={"p-3"}>
       <Row className={"pb-3"}>
         <Col>
+          <Alert variant={"warning"} dismissible>
+            <p>
+              This tool is in early development. I recommend you{" "}
+              <strong>not</strong> use it for anything beyond experimentation
+              and as a conversation piece.
+            </p>
+            <p className={"mb-0"}>
+              Some of its shortcomings are: It does not handle nested attributes
+              yet (e.g. <code>depth.has_raw_value</code>). It does not determine
+              collection names yet. It does not consolidate consecutive
+              operations having the same action and involving the same
+              collection into a single payload yet. You can learn about its
+              shortcomings by reading the <samp>TODO</samp> and{" "}
+              <samp>FIXME</samp> comments in its source code.
+            </p>
+          </Alert>
           <h1>
             Changesheet converter <AboutMessageTooltipTrigger />
           </h1>
