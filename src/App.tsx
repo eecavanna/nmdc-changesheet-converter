@@ -4,7 +4,7 @@ import CodeMirror, { highlightWhitespace } from "@uiw/react-codemirror";
 import { langs } from "@uiw/codemirror-extensions-langs";
 import { codeMirrorExtensions } from "./lib/codemirror.ts";
 import {
-  ActionValue,
+  Action,
   parseChangesheetContent,
   populateMissingActions,
   populateMissingIds,
@@ -38,9 +38,9 @@ v2		has_raw_value	NEW RAW VALUE 2
 const makePayload = (row: CSRow): object => {
   switch (row.action) {
     // Note: We leverage JavaScript's "fall through" behavior to achieve a logical "OR" effect.
-    case ActionValue.INSERT:
-    case ActionValue.INSERT_ITEM:
-    case ActionValue.INSERT_ITEMS: {
+    case Action.INSERT:
+    case Action.INSERT_ITEM:
+    case Action.INSERT_ITEMS: {
       // FIXME: The "Authoring Changesheets" document says the item will only be added to the list if
       //        the list doesn't already contain the same item. Can that sort of _conditional_ adding
       //        be done via `/queries:run`?
@@ -53,10 +53,10 @@ const makePayload = (row: CSRow): object => {
         ],
       };
     }
-    case ActionValue.UPDATE:
-    case ActionValue.SET:
-    case ActionValue.REPLACE:
-    case ActionValue.REPLACE_ITEMS: {
+    case Action.UPDATE:
+    case Action.SET:
+    case Action.REPLACE:
+    case Action.REPLACE_ITEMS: {
       // Reference: https://www.mongodb.com/docs/manual/reference/operator/update/set
       return {
         update: "TODO_set", // FIXME: Determine real collection name (may need to access API, or check schema).
@@ -65,7 +65,7 @@ const makePayload = (row: CSRow): object => {
         ],
       };
     }
-    case ActionValue.REMOVE: {
+    case Action.REMOVE: {
       // Reference: https://www.mongodb.com/docs/manual/reference/operator/update/unset
       return {
         update: "TODO_set", // FIXME: Determine real collection name (may need to access API, or check schema).

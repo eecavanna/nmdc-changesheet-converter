@@ -4,7 +4,7 @@
 
 import { parse } from "papaparse";
 
-export enum ActionValue {
+export enum Action {
   INSERT = "insert",
   INSERT_ITEM = "insert item",
   INSERT_ITEMS = "insert items",
@@ -19,7 +19,7 @@ export enum ActionValue {
 
 export interface Row {
   id: string; // can be empty string
-  action: ActionValue | ""; // can be empty string
+  action: Action | ""; // can be empty string
   attribute: string;
   value: string; // TODO: Support non-string values, too
 }
