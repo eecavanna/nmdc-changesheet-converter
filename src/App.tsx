@@ -114,18 +114,19 @@ function App() {
           <Alert variant={"warning"} dismissible>
             <p>
               This tool is a proof of concept based upon a conversation about
-              changesheet usability that took place during a hackathon. I
-              recommend you <strong>not</strong> use it for anything beyond
-              experimentation and as a conversation piece.
+              changesheet usability that took place during a hackathon. Given
+              its current state of development, I recommend it be used only as a
+              conversation piece or for experimentation.
             </p>
             <p className={"mb-0"}>
-              Some of its shortcomings are: It does not determine collection
-              names yet. It does not handle nested attributes yet (e.g.{" "}
-              <code>depth.has_raw_value</code>). It does not parse values into
-              data types other than strings yet. It does not consolidate
+              It has several shortcomings; for example: It does not determine
+              collection names yet. It does not handle nested attributes (e.g.{" "}
+              <code>depth.has_raw_value</code>) yet. It does not parse values
+              into data types other than strings (e.g. <code>123</code> →{" "}
+              <code>&quot;123&quot;</code>) yet. It does not consolidate
               consecutive operations having the same action and involving the
               same collection into a single payload yet. You can learn about its
-              shortcomings by reading the <samp>TODO</samp> and{" "}
+              other shortcomings by reading the <samp>TODO</samp> and{" "}
               <samp>FIXME</samp> comments in its source code.
             </p>
           </Alert>
