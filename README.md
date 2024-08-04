@@ -21,3 +21,7 @@
 
 - [Authoring changesheets](https://microbiomedata.github.io/nmdc-runtime/howto-guides/author-changesheets/)
 - [Example changesheet](https://github.com/microbiomedata/nmdc-runtime/blob/main/metadata-translation/notebooks/data/changesheet-without-separator3.tsv)
+
+## Branding
+
+- [Ballot box favicon](https://openmoji.org/library/emoji-1F5F3/)

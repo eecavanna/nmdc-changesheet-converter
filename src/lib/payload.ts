@@ -6,6 +6,8 @@ import { Action, Row } from "./changesheet.ts";
  * Throws an error when it is not possible to generate such a payload, given that
  * the `/queries:run` API endpoint only supports a limited range of commands.
  *
+ * TODO: Handle dot-delimited paths to nested fields.
+ *
  * References:
  * - https://microbiomedata.github.io/nmdc-runtime/howto-guides/author-changesheets/
  * - https://api.microbiomedata.org/docs#/queries/run_query_queries_run_post
