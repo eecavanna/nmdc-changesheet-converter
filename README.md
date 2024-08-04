@@ -15,6 +15,7 @@
   highlighting extension for React CodeMirror
 - [@codemirror/commands](https://github.com/codemirror/commands) - Editing functionality for CodeMirror (we use it to
   customize the effect of pressing the tab key)
+- [copy-to-clipboard](https://github.com/sudodoki/copy-to-clipboard) - Facilitates copying text to the clipboard
 - [vitest](https://github.com/vitest-dev/vitest) - Testing framework powered by Vite
 
 ## References

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import DataGrid from "react-data-grid";
 import CodeMirror, { highlightWhitespace } from "@uiw/react-codemirror";
 import { langs } from "@uiw/codemirror-extensions-langs";
@@ -12,15 +12,19 @@ import {
 import "react-data-grid/lib/styles.css";
 import {
   Alert,
+  Button,
   Col,
   Collapse,
   Container,
+  OverlayTrigger,
   Row,
   Stack,
   ToggleButton,
+  Tooltip,
 } from "react-bootstrap";
 import { AboutMessageTooltipTrigger } from "./components/misc.tsx";
 import { makePayloads } from "./lib/payload.ts";
+import copy from "copy-to-clipboard";
 
 // Note: This string was copy/pasted from: `src/lib/test-data/vendor/changesheet-without-separator1.tsv`
 const initialChangesheetContent = `
@@ -76,6 +80,33 @@ function App() {
     console.warn(error);
   }
 
+  const [isCopiedIndicatorVisible, setIsCopiedIndicatorVisible] =
+    useState<boolean>(false);
+
+  const timeoutIdRef = useRef<NodeJS.Timeout | undefined>();
+
+  const onClickCopy = () => {
+    // Copy the payloads to the clipboard.
+    copy(payloads, {
+      format: "text/plain",
+      onCopy: () => {
+        // Cancel any already-scheduled hiding of the indicator.
+        if (timeoutIdRef.current !== undefined) {
+          clearTimeout(timeoutIdRef.current);
+          timeoutIdRef.current = undefined;
+        }
+
+        // Show the indicator.
+        setIsCopiedIndicatorVisible(true);
+
+        // Schedule a hiding of the indicator.
+        timeoutIdRef.current = setTimeout(() => {
+          setIsCopiedIndicatorVisible(false);
+        }, 2000);
+      },
+    });
+  };
+
   return (
     <Container fluid className={"p-3"}>
       <Row className={"pb-3"}>
@@ -114,7 +145,7 @@ function App() {
             gap={3}
             className={"justify-content-between"}
           >
-            <h3>Changesheet</h3>
+            <h2>Changesheet</h2>
             <ToggleButton
               className={"mb-1"}
               variant={"secondary"}
@@ -126,8 +157,13 @@ function App() {
               onChange={(e) =>
                 setIsDebugSectionVisible(e.currentTarget.checked)
               }
+              title={
+                isDebugSectionVisible
+                  ? "Hide intermediate conversion stages"
+                  : "Show intermediate conversion stages"
+              }
             >
-              {isDebugSectionVisible ? "Hide " : "Show "} intermediate states
+              {isDebugSectionVisible ? "Hide " : "Show "} intermediate stages
             </ToggleButton>
           </Stack>
           <p>Drop a changesheet file or paste the changesheet contents here.</p>
@@ -151,7 +187,7 @@ function App() {
         <div>
           <Row className={"pb-3"}>
             <Col>
-              <h3>Changesheet as table (raw)</h3>
+              <h2>Changesheet as table (raw)</h2>
               <p>
                 Here&apos;s a table showing the changesheet contents verbatim.
               </p>
@@ -163,7 +199,7 @@ function App() {
             style={failedToInferStuff ? { filter: "blur(8px)" } : {}}
           >
             <Col>
-              <h3>Changesheet as table (dense)</h3>
+              <h2>Changesheet as table (dense)</h2>
               <p>
                 Here&apos;s a table in which all empty <code>id</code> and{" "}
                 <code>action</code> cells, if any, have been filled in using the
@@ -176,18 +212,44 @@ function App() {
       </Collapse>
       <Row style={failedToInferStuff ? { filter: "blur(8px)" } : {}}>
         <Col>
-          <h3>Payloads</h3>
+          <h2>Payloads</h2>
           <p>
             Here are the equivalent HTTP request payloads for the{" "}
             <code>/queries:run</code> endpoint of the NMDC Runtime API.
           </p>
           {/* TODO: Once we know the collection names, combine consecutive payloads involving the same collection. */}
-          <CodeMirror
-            editable={false}
-            theme={"dark"}
-            extensions={[langs.json()]}
-            value={payloads}
-          />
+          <div className={"position-relative"}>
+            <CodeMirror
+              editable={false}
+              theme={"dark"}
+              extensions={[langs.json()]}
+              value={payloads}
+            />
+            <div
+              className={"position-absolute"}
+              style={{ top: 0, right: 0, padding: 8 }}
+            >
+              <OverlayTrigger
+                show={isCopiedIndicatorVisible}
+                overlay={
+                  <Tooltip id={"copied-indicator-tooltip"}>Copied</Tooltip>
+                }
+              >
+                <Button
+                  size={"sm"}
+                  variant={"secondary"}
+                  onClick={onClickCopy}
+                  title={"Copy to clipboard"}
+                >
+                  {isCopiedIndicatorVisible ? (
+                    <i className="bi bi-clipboard-check"></i>
+                  ) : (
+                    <i className="bi bi-clipboard"></i>
+                  )}
+                </Button>
+              </OverlayTrigger>
+            </div>
+          </div>
         </Col>
       </Row>
     </Container>
