@@ -4,6 +4,7 @@ import CodeMirror, { highlightWhitespace } from "@uiw/react-codemirror";
 import { langs } from "@uiw/codemirror-extensions-langs";
 import { codeMirrorExtensions } from "./lib/codemirror.ts";
 import {
+  ActionValue,
   parseChangesheetContent,
   populateMissingActions,
   populateMissingIds,
@@ -24,15 +25,57 @@ v1		has_raw_value	10.9999/8888
 v2		has_raw_value	NEW RAW VALUE 2
 `.trim();
 
-// FIXME: Determine the relevant collection name (may need to check schema or access API).
-// Reference: https://api.microbiomedata.org/docs#/queries/run_query_queries_run_post
+/**
+ * Returns a `/queries:run` payload equivalent to the specified row.
+ *
+ * Throws an error when it is not possible to generate such a payload, given that
+ * the `/queries:run` API endpoint only supports a limited range of commands.
+ *
+ * References:
+ * - https://microbiomedata.github.io/nmdc-runtime/howto-guides/author-changesheets/
+ * - https://api.microbiomedata.org/docs#/queries/run_query_queries_run_post
+ */
 const makePayload = (row: CSRow): object => {
-  return {
-    update: "TODO_set",
-    updates: [
-      { q: { id: row.id }, u: { $set: { [row.attribute]: row.value } } },
-    ],
-  };
+  switch (row.action) {
+    // Note: We leverage JavaScript's "fall through" behavior to achieve a logical "OR" effect.
+    case ActionValue.INSERT:
+    case ActionValue.INSERT_ITEM:
+    case ActionValue.INSERT_ITEMS: {
+      // FIXME: The "Authoring Changesheets" document says the item will only be added to the list if
+      //        the list doesn't already contain the same item. Can that sort of _conditional_ adding
+      //        be done via `/queries:run`?
+      //
+      // Reference: https://www.mongodb.com/docs/manual/reference/operator/update/push
+      return {
+        update: "TODO_set", // FIXME: Determine real collection name (may need to access API, or check schema).
+        updates: [
+          { q: { id: row.id }, u: { $push: { [row.attribute]: row.value } } },
+        ],
+      };
+    }
+    case ActionValue.UPDATE:
+    case ActionValue.SET:
+    case ActionValue.REPLACE:
+    case ActionValue.REPLACE_ITEMS: {
+      // Reference: https://www.mongodb.com/docs/manual/reference/operator/update/set
+      return {
+        update: "TODO_set", // FIXME: Determine real collection name (may need to access API, or check schema).
+        updates: [
+          { q: { id: row.id }, u: { $set: { [row.attribute]: row.value } } },
+        ],
+      };
+    }
+    case ActionValue.REMOVE: {
+      // Reference: https://www.mongodb.com/docs/manual/reference/operator/update/unset
+      return {
+        update: "TODO_set", // FIXME: Determine real collection name (may need to access API, or check schema).
+        updates: [{ q: { id: row.id }, u: { $unset: row.attribute } }],
+      };
+    }
+    default: {
+      throw Error("Failed to generate equivalent payload.");
+    }
+  }
 };
 
 const makePayloads = (rows: CSRow[]): string => {
@@ -54,10 +97,24 @@ function App() {
 
   // Get a version where all `action` and `id` values are explicit.
   // Reference: https://developer.mozilla.org/en-US/docs/Web/API/structuredClone
-  // FIXME: Now that the changesheet content (UI field) is editable, catch exceptions thrown by these functions.
-  const rowsExplicit = populateMissingActions(
-    populateMissingIds(window.structuredClone(rows)),
-  );
+  let failedToInferStuff = false;
+  let rowsExplicit: CSRow[] = [];
+  try {
+    rowsExplicit = populateMissingActions(
+      populateMissingIds(window.structuredClone(rows)),
+    );
+  } catch (error) {
+    console.warn(error);
+    failedToInferStuff = true;
+  }
+
+  // Make a list of `/queries:run` API endpoint payloads.
+  let payloads = "";
+  try {
+    payloads = makePayloads(rowsExplicit);
+  } catch (error) {
+    console.warn(error);
+  }
 
   return (
     <Container fluid>
@@ -94,26 +151,28 @@ function App() {
           <DataGrid columns={columns} rows={rows} />
         </Col>
       </Row>
-      <Row className={"pb-3"}>
+      <Row
+        className={"pb-3"}
+        style={failedToInferStuff ? { filter: "blur(8px)" } : {}}
+      >
         <Col>
           <h3>
-            Changesheet as table (with explicit <code>id</code> and{" "}
+            Changesheet as table (showing inferred <code>id</code> and{" "}
             <code>action</code> values)
           </h3>
           <DataGrid columns={columns} rows={rowsExplicit} />
         </Col>
       </Row>
-      <Row>
+      <Row style={failedToInferStuff ? { filter: "blur(8px)" } : {}}>
         <Col>
           <h3>
-            (TODO) Equivalent payloads for <code>/queries:run</code> API
-            endpoint
+            Equivalent payloads for <code>/queries:run</code> API endpoint
           </h3>
           <CodeMirror
             editable={false}
             theme={"dark"}
             extensions={[langs.json()]}
-            value={makePayloads(rowsExplicit)}
+            value={payloads}
           />
         </Col>
       </Row>

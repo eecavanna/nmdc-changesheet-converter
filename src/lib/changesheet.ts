@@ -4,7 +4,7 @@
 
 import { parse } from "papaparse";
 
-enum ActionValue {
+export enum ActionValue {
   INSERT = "insert",
   INSERT_ITEM = "insert item",
   INSERT_ITEMS = "insert items",
