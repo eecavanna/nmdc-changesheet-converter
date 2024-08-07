@@ -25,6 +25,8 @@ import {
 import { AboutMessageTooltipTrigger } from "./components/misc.tsx";
 import { makePayloads } from "./lib/payload.ts";
 import copy from "copy-to-clipboard";
+import { saveAs } from "file-saver";
+import { unparse } from "papaparse";
 
 // Note: This string was copy/pasted from: `src/lib/test-data/vendor/changesheet-without-separator1.tsv`
 const initialChangesheetContent = `
@@ -211,6 +213,113 @@ function App() {
           </Row>
         </div>
       </Collapse>
+      <Row
+        style={failedToInferStuff ? { filter: "blur(8px)" } : {}}
+        className={"pb-3"}
+      >
+        <Col>
+          <h2>Partial changesheets</h2>
+          <p>
+            Here are multiple changesheets that—if submitted in the order shown
+            here—would produce the same effect as submitting the original
+            changesheet.
+          </p>
+          <p className={"small text-muted"}>
+            Currently (as a proof of concept), this tool always splits the
+            original changesheet into two roughly equally-sized parts.
+          </p>
+          <Stack gap={3}>
+            {/* TODO: Allow the user to customize the part size or part count—instead of hard coding it at 50/50. */}
+            <div className={"position-relative"}>
+              <CodeMirror
+                editable={false}
+                theme={"dark"}
+                extensions={[langs.json()]}
+                value={unparse(
+                  rowsExplicit.slice(0, Math.ceil(rowsExplicit.length / 2)),
+                  {
+                    delimiter: "\t",
+                  },
+                )}
+              />
+              <div
+                className={"position-absolute"}
+                style={{ top: 0, right: 0, padding: 8 }}
+              >
+                <Button
+                  size={"sm"}
+                  variant={"secondary"}
+                  onClick={() =>
+                    saveAs(
+                      new File(
+                        [
+                          unparse(
+                            rowsExplicit.slice(
+                              0,
+                              Math.ceil(rowsExplicit.length / 2),
+                            ),
+                            {
+                              delimiter: "\t",
+                            },
+                          ),
+                        ],
+                        "changesheet_part_1_of_2.tsv",
+                        { type: "text/tab-separated-values;charset=utf-8" },
+                      ),
+                    )
+                  }
+                  title={"Download file"}
+                >
+                  <i className="bi bi-file-earmark-arrow-down"></i>
+                </Button>
+              </div>
+            </div>
+            <div className={"position-relative"}>
+              <CodeMirror
+                editable={false}
+                theme={"dark"}
+                extensions={[langs.json()]}
+                value={unparse(
+                  rowsExplicit.slice(Math.ceil(rowsExplicit.length / 2)),
+                  {
+                    delimiter: "\t",
+                  },
+                )}
+              />
+              <div
+                className={"position-absolute"}
+                style={{ top: 0, right: 0, padding: 8 }}
+              >
+                <Button
+                  size={"sm"}
+                  variant={"secondary"}
+                  onClick={() =>
+                    saveAs(
+                      new File(
+                        [
+                          unparse(
+                            rowsExplicit.slice(
+                              Math.ceil(rowsExplicit.length / 2),
+                            ),
+                            {
+                              delimiter: "\t",
+                            },
+                          ),
+                        ],
+                        "changesheet_part_2_of_2.tsv",
+                        { type: "text/tab-separated-values;charset=utf-8" },
+                      ),
+                    )
+                  }
+                  title={"Download file"}
+                >
+                  <i className="bi bi-file-earmark-arrow-down"></i>
+                </Button>
+              </div>
+            </div>
+          </Stack>
+        </Col>
+      </Row>
       <Row style={failedToInferStuff ? { filter: "blur(8px)" } : {}}>
         <Col>
           <h2>Payloads</h2>
